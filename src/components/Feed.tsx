@@ -6,6 +6,7 @@ import {
   Backdrop,
   CircularProgress,
   Container,
+  Typography,
 } from "@material-ui/core";
 import React from "react";
 import { NewPost, Post } from ".";
@@ -45,11 +46,13 @@ function Feed({ drawNewPost = true, ...props }: FeedProps) {
           post={{ userId: "0", content: "pp", timestamp: new Date() }}
         />
       )}
-      {Object.entries(props.feed).map((
-        [ts, post] //TODO: timestamppppp
-      ) => (
-        <Post key={ts} user={props.people[post.userId]} post={post} />
-      ))}
+      {Object.keys(props.feed).length ? (
+        Object.entries(props.feed).map((
+          [ts, post] //TODO: timestamppppp
+        ) => <Post key={ts} user={props.people[post.userId]} post={post} />)
+      ) : (
+        <Typography variant="h6">There's no posts to be shown</Typography>
+      )}
     </Container>
   ) : (
     <div>
