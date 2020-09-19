@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { withStyles, WithStyles } from "@material-ui/core/styles";
-import { Switch, Route, RouteComponentProps } from "react-router-dom";
+import { Switch, Route, RouteComponentProps, Redirect } from "react-router-dom";
 
 import {
   Box,
@@ -19,6 +19,7 @@ import NewsFeed from "./feed";
 import * as r from "../misc/reference";
 import { LeftSidebar } from "./leftSidebar";
 import Profile from "./profile";
+import { connect } from "react-redux";
 
 const AppCSS = (theme: Theme) =>
   createStyles({
@@ -37,6 +38,7 @@ type AppState = {
   mobileOpen: boolean;
 };
 interface AppProps extends WithStyles<typeof AppCSS> {
+  user: r.User;
   /*
   currentUser: r.User;
   currentProfile: r.Profile | null;
@@ -87,6 +89,10 @@ class App extends Component<AppProps, AppState> {
                 <Route exact path="/">
                   <NewsFeed />
                 </Route>
+                <Route exact path="/profile">
+                  <Redirect to={"/profile/" + this.props.user.userId} />
+                </Route>
+
                 <Route
                   path="/profile/:id"
                   render={({ match }: RouteComponentProps<MatchParams>) => (
@@ -117,4 +123,8 @@ function AppToolbar(props: { setMenu: () => void }) {
   );
 }
 
-export default withStyles(AppCSS)(App);
+const mapStateToProps = ({ data }: { data: r.State }) => ({
+  user: data.currentUser,
+});
+
+export default connect(mapStateToProps)(withStyles(AppCSS)(App));
