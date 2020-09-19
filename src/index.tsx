@@ -9,6 +9,7 @@ import { Provider } from "react-redux";
 import { createStore, applyMiddleware } from "redux";
 import thunk from "redux-thunk";
 import * as r from "./misc/reference";
+import { getCurrentUser } from "./actions";
 
 const store = createStore(rootReducer, applyMiddleware(thunk));
 store.subscribe(() => {
@@ -20,6 +21,7 @@ store.subscribe(() => {
   console.log(state.data);
   console.log("%c</STORE>", "color: red; font-size: 20px;");
 });
+store.dispatch<any>(getCurrentUser()); //start the current user listener
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
