@@ -30,6 +30,9 @@ const FeedCSS = (theme: Theme) =>
 interface FeedProps extends WithStyles<typeof FeedCSS> {
   feed: r.Feed | null;
   user: r.User;
+  people: {
+    [key: string]: r.User;
+  };
   drawNewPost?: boolean;
 }
 
@@ -45,7 +48,7 @@ function Feed({ drawNewPost = true, ...props }: FeedProps) {
       {Object.entries(props.feed).map((
         [ts, post] //TODO: timestamppppp
       ) => (
-        <Post key={ts} user={props.user} post={post} />
+        <Post key={ts} user={props.people[post.userId]} post={post} />
       ))}
     </Container>
   ) : (

@@ -93,7 +93,12 @@ export const Profile = (props: {
         <Card className={classes.card}>
           <TopBar user={profile.data} />
           <div className={classes.root}>
-            <Feed feed={posts} user={profile.data} drawNewPost={false} />
+            <Feed
+              people={people}
+              feed={posts}
+              user={profile.data}
+              drawNewPost={false}
+            />
             <Divider orientation="vertical" flexItem />
             <div className={classes.friendList}>
               <Typography variant="h5">Friends</Typography>

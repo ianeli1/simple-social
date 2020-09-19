@@ -19,6 +19,9 @@ const mapDispatchToProps = (dispatch: r.AppDispatch) => ({
 interface NewsFeedProps {
   feed: r.Feed | null;
   user: r.User;
+  people: {
+    [key: string]: r.User;
+  };
   drawNewPost: boolean;
   getFeed: (userId: string) => void;
 }
@@ -47,7 +50,13 @@ class NewsFeed extends Component<NewsFeedProps, NewsFeedState> {
   }
 
   render() {
-    return <Feed user={this.props.user} feed={this.state.feed} />;
+    return (
+      <Feed
+        people={this.props.people}
+        user={this.props.user}
+        feed={this.state.feed}
+      />
+    );
   }
 }
 
