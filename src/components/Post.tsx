@@ -9,6 +9,7 @@ import { Favorite, ChatBubble, Share } from "@material-ui/icons";
 import React from "react";
 import { UserData } from "./UserData";
 import * as r from "../misc/reference";
+import { formatDate } from "../misc/format";
 
 const postStyle = makeStyles({
   root: {
@@ -39,7 +40,9 @@ export function Post(props: { user: r.User; post: r.Post }) {
     <Paper className={classes.root}>
       <Box className={classes.firstRow}>
         <UserData user={props.user} />
-        <Typography variant="h6">@ 12/12/31 17:37</Typography>
+        <Typography variant="h6">
+          @ {formatDate(props.post.timestamp)}
+        </Typography>
       </Box>
       <Box className={classes.content}>
         <Typography variant="body1">{props.post.content}</Typography>
