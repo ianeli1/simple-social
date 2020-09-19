@@ -37,21 +37,60 @@ export function startAuthListener(callback: (user: r.User | null) => void) {
 export async function createNewUser(
   email: string,
   password: string,
-  user: Omit<r.User, "userId">
+  user: Omit<r.User, "userId">,
+  icon: File | null
 ) {
   try {
+    let iconUrl = "";
+    if (icon) {
+      let k: firebase.storage.UploadTaskSnapshot = await new Promise(
+        (resolve, reject) => {
+          let task = firebase
+            .storage()
+            .ref("pfp/" + String(Date.now()) + "." + icon.name.split(".").pop())
+            .put(icon);
+          task.on(
+            "state_changed",
+            function progress(snapshot) {}, //implement
+            function error(err) {
+              reject(err);
+              console.log(err);
+            },
+            function complete() {
+              resolve(task);
+            }
+          );
+        }
+      );
+      iconUrl = await k.ref.getDownloadURL();
+    }
     const userC = await firebase
       .auth()
       .createUserWithEmailAndPassword(email, password);
     if (userC.user) {
       const userObj = new User(userC.user.uid);
-      return await userObj.create(user);
+      return (await iconUrl)
+        ? userObj.create({ ...user, icon: iconUrl })
+        : userObj.create(user);
     } else {
       return false;
     }
   } catch (e) {
     firebase.auth().signOut();
     console.log("An error ocurred while creating an user:", e);
+    return false;
+  }
+}
+
+export async function login(email: string, password: string) {
+  try {
+    const userC = await firebase
+      .auth()
+      .signInWithEmailAndPassword(email, password);
+    return userC.user ? true : false;
+  } catch (e) {
+    firebase.auth().signOut();
+    console.log("An error ocurred while logging in:", e);
     return false;
   }
 }
@@ -128,12 +167,10 @@ export class User {
 
   async create(user: Omit<r.User, "userId">): Promise<boolean> {
     try {
-      const newProfile: r.Profile = {
-        data: {
-          ...user,
-          icon: user.icon ? user.icon : "_noIcon_", //TODO: firestore can save null values
-          userId: this.userId,
-        },
+      const newProfile = {
+        ...user,
+        icon: user.icon ? user.icon : "_noIcon_", //TODO: firestore can save null values
+        userId: this.userId,
         friends: [],
         posts: [],
       };
