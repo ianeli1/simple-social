@@ -191,7 +191,7 @@ export interface Action {
 }
 
 export interface State {
-  currentUser: User;
+  currentUser: User | null;
   currentProfile: Profile | null; //used for the Profile site
   feed: Feed | null; //used for the News Feed
   users: {

@@ -1,9 +1,9 @@
 import * as r from "../misc/reference";
-import { Profile, Feed } from "../misc/firebaseMgmt";
+import { Profile, Feed, startAuthListener } from "../misc/firebaseMgmt";
 
-export const setCurrentUser = (user: r.User) => ({
+export const setCurrentUser = (user: r.User | null): r.Action => ({
   type: r.ACT.SET_USER_INFO,
-  user: user,
+  user: user || undefined,
 });
 
 export const addRef = (post: r.Post, id: string) => ({
@@ -70,4 +70,9 @@ export const getFeed = (currentId: string): r.AppThunk => async (dispatch) => {
     dispatch(addUsers(reduxPacket.users));
     dispatch(setFeed(reduxPacket.posts));
   });
+};
+
+export const getCurrentUser = (): r.AppThunk => async (dispatch) => {
+  dispatch(setCurrentUser(null));
+  startAuthListener((user) => dispatch(setCurrentUser(user)));
 };

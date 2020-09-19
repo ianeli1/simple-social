@@ -23,6 +23,17 @@ declare global {
 
 window.firestore = db.collection("globalPosts");
 
+export function startAuthListener(callback: (user: r.User | null) => void) {
+  firebase.auth().onAuthStateChanged(async (user) => {
+    if (user) {
+      const currentUser = new User(user.uid);
+      callback(await currentUser.getData());
+    } else {
+      callback(null);
+    }
+  });
+}
+
 async function asyncForEach(
   array: Array<any>,
   callback: (element: any, index: number, array: Array<any>) => void
