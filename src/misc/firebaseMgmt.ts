@@ -34,6 +34,28 @@ export function startAuthListener(callback: (user: r.User | null) => void) {
   });
 }
 
+export async function createNewUser(
+  email: string,
+  password: string,
+  user: Omit<r.User, "userId">
+) {
+  try {
+    const userC = await firebase
+      .auth()
+      .createUserWithEmailAndPassword(email, password);
+    if (userC.user) {
+      const userObj = new User(userC.user.uid);
+      return await userObj.create(user);
+    } else {
+      return false;
+    }
+  } catch (e) {
+    firebase.auth().signOut();
+    console.log("An error ocurred while creating an user:", e);
+    return false;
+  }
+}
+
 async function asyncForEach(
   array: Array<any>,
   callback: (element: any, index: number, array: Array<any>) => void
@@ -102,6 +124,25 @@ export class User {
     this.friends = [];
     this.feed = [];
     this.icon = null;
+  }
+
+  async create(user: Omit<r.User, "userId">): Promise<boolean> {
+    try {
+      const newProfile: r.Profile = {
+        data: {
+          ...user,
+          icon: user.icon ? user.icon : "_noIcon_", //TODO: firestore can save null values
+          userId: this.userId,
+        },
+        friends: [],
+        posts: [],
+      };
+      await this.ref.set(newProfile);
+      return true;
+    } catch (e) {
+      console.log("An error ocurred while saving the user's data", e);
+      return false;
+    }
   }
 
   async getData(): Promise<r.User> {
