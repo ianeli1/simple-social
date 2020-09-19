@@ -18,7 +18,7 @@ const mapDispatchToProps = (dispatch: r.AppDispatch) => ({
 
 interface NewsFeedProps {
   feed: r.Feed | null;
-  user: r.User;
+  user: r.User | null;
   people: {
     [key: string]: r.User;
   };
@@ -39,7 +39,7 @@ class NewsFeed extends Component<NewsFeedProps, NewsFeedState> {
   }
 
   componentDidMount() {
-    this.props.getFeed(this.props.user.userId);
+    this.props.user && this.props.getFeed(this.props.user.userId); //what if the object gets rendered but user doesn't exist?
   }
 
   componentDidUpdate(prevProps: NewsFeedProps) {
@@ -50,12 +50,14 @@ class NewsFeed extends Component<NewsFeedProps, NewsFeedState> {
   }
 
   render() {
-    return (
+    return this.props.user ? (
       <Feed
         people={this.props.people}
         user={this.props.user}
         feed={this.state.feed}
       />
+    ) : (
+      <p>Uh oh, this shouldn't happen</p>
     );
   }
 }
