@@ -14,7 +14,7 @@ import {
 } from "@material-ui/core";
 import { getProfile } from "../actions";
 
-import { People, Feed } from "../components";
+import { People, Feed, TopBar } from "../components";
 
 const ProfileStyle = makeStyles((theme: Theme) => ({
   root: {
@@ -101,7 +101,9 @@ export const Profile = (props: {
             />
             <Divider orientation="vertical" flexItem />
             <div className={classes.friendList}>
-              <Typography variant="h5">Friends</Typography>
+              <Typography variant="h5">
+                Friends({String(props.people.length || 0)})
+              </Typography>
               <People people={props.people} />
             </div>
           </div>
@@ -116,45 +118,6 @@ export const Profile = (props: {
     </Container>
   );
 };
-
-const TopBarStyles = makeStyles({
-  root: {
-    display: "flex",
-    flexDirection: "row",
-  },
-  avatar: {
-    height: 80,
-    width: 80,
-  },
-  namedesc: {
-    display: "flex",
-    margin: "0 8px",
-    flexDirection: "column",
-  },
-});
-
-function TopBar(props: { user: r.User }) {
-  const classes = TopBarStyles();
-  return (
-    <div className={classes.root}>
-      {props.user.icon ? (
-        <Avatar
-          className={classes.avatar}
-          alt={props.user.name[0]}
-          src={props.user.icon}
-        />
-      ) : (
-        <Avatar className={classes.avatar}>{props.user.name[0]}</Avatar>
-      )}
-      <div className={classes.namedesc}>
-        <Typography variant="h4">{props.user.name}</Typography>
-        {props.user.desc && (
-          <Typography variant="h6">{props.user.desc}</Typography>
-        )}
-      </div>
-    </div>
-  );
-}
 
 const mapStateToProps = ({ data }: { data: r.State }) => ({
   profile: data.currentProfile,
