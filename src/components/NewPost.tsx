@@ -9,7 +9,7 @@ import {
   Typography,
 } from "@material-ui/core";
 import { Favorite, Send } from "@material-ui/icons";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { UserData } from "./UserData";
 import { formatDate } from "../misc/format";
 import * as r from "../misc/reference";
@@ -52,9 +52,18 @@ const newPostStyles = makeStyles({
   },
 });
 
-export function NewPost(props: { user: r.User; post: r.Post }) {
+export function NewPost(props: { user: r.User }) {
   const [time, setTime] = useState<Date>(new Date());
-  setInterval(async () => await setTime(new Date()), 1000 * 60);
+  useEffect(() => {
+    const dateInterval = setInterval(
+      async () => await setTime(new Date()),
+      1000 * 60
+    );
+    return () => {
+      clearInterval(dateInterval);
+    };
+  });
+
   const classes = newPostStyles();
   return (
     //It's a header so the feed doesn't change its margin
