@@ -211,9 +211,9 @@ export interface ReduxPacket {
 
 export type AppThunk<ReturnType = void> = ThunkAction<
   ReturnType,
-  State,
+  { data: State },
   unknown,
   Action
 >;
 
-export type AppDispatch = ThunkDispatch<State, unknown, Action>;
+export type AppDispatch = ThunkDispatch<{ data: State }, unknown, Action>;

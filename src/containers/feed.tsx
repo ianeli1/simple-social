@@ -13,7 +13,7 @@ const mapStateToProps = ({ data }: { data: r.State }) => ({
 });
 
 const mapDispatchToProps = (dispatch: r.AppDispatch) => ({
-  getFeed: (userId: string) => dispatch(getFeed(userId)),
+  getFeed: () => dispatch(getFeed()),
 });
 
 interface NewsFeedProps {
@@ -23,7 +23,7 @@ interface NewsFeedProps {
     [key: string]: r.User;
   };
   drawNewPost: boolean;
-  getFeed: (userId: string) => void;
+  getFeed: () => void;
 }
 
 interface NewsFeedState {
@@ -42,7 +42,7 @@ class NewsFeed extends Component<NewsFeedProps, NewsFeedState> {
 
   componentDidMount() {
     if (this.state.user) {
-      this.props.getFeed(this.state.user.userId);
+      this.props.getFeed();
     }
   }
 
@@ -54,7 +54,7 @@ class NewsFeed extends Component<NewsFeedProps, NewsFeedState> {
     ) {
       this.setState(
         { user: this.props.user },
-        () => this.state.user && this.props.getFeed(this.state.user.userId)
+        () => this.state.user && this.props.getFeed()
       );
     }
     if (!this.state.feed && this.props.feed) {

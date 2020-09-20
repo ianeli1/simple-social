@@ -227,9 +227,14 @@ export class Post {
   content: string;
   timestamp: Date;
   userId: string;
-  constructor(postId: string) {
-    this.postId = postId;
-    this.ref = db.collection("globalPosts").doc(postId);
+  constructor(postId?: string) {
+    if (postId) {
+      this.postId = postId;
+    } else {
+      this.postId = String(Date.now());
+    }
+
+    this.ref = db.collection("globalPosts").doc(this.postId);
     this.content = "";
     this.userId = "";
     this.timestamp = new Date();

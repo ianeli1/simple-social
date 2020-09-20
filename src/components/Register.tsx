@@ -5,6 +5,7 @@ import {
   AppBar,
   Avatar,
   Button,
+  CircularProgress,
   Container,
   Dialog,
   DialogTitle,
@@ -20,6 +21,7 @@ import {
 import { Close } from "@material-ui/icons";
 import { TransitionProps } from "@material-ui/core/transitions/transition";
 import { TopBar } from ".";
+import { green } from "@material-ui/core/colors";
 
 const RegisterStyle = makeStyles((theme: Theme) => ({
   appBar: {
@@ -38,6 +40,14 @@ const RegisterStyle = makeStyles((theme: Theme) => ({
   desc: {
     display: "flex",
   },
+  progress: {
+    color: green[500],
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginTop: -12,
+    marginLeft: -12,
+  },
 }));
 
 const Transition = React.forwardRef(function Transition(
@@ -54,7 +64,8 @@ type RegisterProps = {
     email: string,
     password: string,
     user: Omit<r.User, "userId">,
-    icon: File | null
+    icon: File | null,
+    progressCallback?: (percentage: number) => void
   ) => Promise<boolean>;
 };
 
@@ -72,7 +83,7 @@ export const Register = (props: RegisterProps) => {
   }
   async function handleRegister() {
     if (name && email && password) {
-      props.createUser(
+      const result = await props.createUser(
         email,
         password,
         {
@@ -80,8 +91,14 @@ export const Register = (props: RegisterProps) => {
           desc,
           icon: null,
         },
-        file
+        file,
+        (percentage) => setLoading(percentage)
       );
+      if (result) {
+        handleClose();
+      } else {
+        setError(true); //TODO: be more specific
+      }
     }
   }
 
@@ -91,7 +108,7 @@ export const Register = (props: RegisterProps) => {
       setFile(event.target.files[0]);
     }
   }
-
+  const [loading, setLoading] = useState(0);
   return (
     <Dialog
       fullScreen
@@ -203,9 +220,19 @@ export const Register = (props: RegisterProps) => {
             </div>
           </div>
         </Paper>
-        <Button onClick={handleRegister} variant="contained" color="primary">
-          Create user!
-        </Button>
+        <div>
+          <Button
+            onClick={handleRegister}
+            variant="contained"
+            color="primary"
+            disabled={Boolean(loading)}
+          >
+            {loading > 0 ? String(loading) + "%" : "Create user"}
+          </Button>
+          {loading && (
+            <CircularProgress size={24} className={classes.progress} />
+          )}
+        </div>
       </Container>
     </Dialog>
   );

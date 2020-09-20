@@ -73,7 +73,7 @@ class App extends Component<AppProps, AppState> {
       mobileOpen: false,
       loggedIn: Boolean(this.props.user),
       showLogin: false,
-      showRegister: true,
+      showRegister: false,
     };
   }
 
@@ -180,7 +180,7 @@ function AppToolbar(props: {
         ) : (
           <div>
             <Button onClick={props.openLogin}>Login</Button>
-            <Button onClick={props.openLogin}>Register</Button>
+            <Button onClick={props.openRegister}>Register</Button>
           </div>
         )}
       </Toolbar>
