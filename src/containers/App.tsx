@@ -180,7 +180,7 @@ function AppToolbar(props: {
         ) : (
           <div>
             <Button onClick={props.openLogin}>Login</Button>
-            <Button onClick={props.openLogin}>Register</Button>
+            <Button onClick={props.openRegister}>Register</Button>
           </div>
         )}
       </Toolbar>
