@@ -28,32 +28,45 @@ interface NewsFeedProps {
 
 interface NewsFeedState {
   feed: r.Feed | null;
+  user: r.User | null;
 }
 
 class NewsFeed extends Component<NewsFeedProps, NewsFeedState> {
   constructor(props: NewsFeedProps) {
     super(props);
     this.state = {
+      user: props.user,
       feed: null,
     };
   }
 
   componentDidMount() {
-    this.props.user && this.props.getFeed(this.props.user.userId); //what if the object gets rendered but user doesn't exist?
+    if (this.state.user) {
+      this.props.getFeed(this.state.user.userId);
+    }
   }
 
   componentDidUpdate(prevProps: NewsFeedProps) {
     //TODO: look for changes
+    if (
+      this.props.user &&
+      (!this.state.user || this.state.user.userId != this.props.user.userId)
+    ) {
+      this.setState(
+        { user: this.props.user },
+        () => this.state.user && this.props.getFeed(this.state.user.userId)
+      );
+    }
     if (!this.state.feed && this.props.feed) {
       this.setState({ feed: this.props.feed });
     }
   }
 
   render() {
-    return this.props.user ? (
+    return this.state.user ? (
       <Feed
         people={this.props.people}
-        user={this.props.user}
+        user={this.state.user}
         feed={this.state.feed}
       />
     ) : (
