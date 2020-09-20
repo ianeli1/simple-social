@@ -34,16 +34,24 @@ export function startAuthListener(callback: (user: r.User | null) => void) {
   });
 }
 
+export function signOut() {
+  firebase.auth().signOut();
+}
+
 export async function createNewUser(
   email: string,
   password: string,
   user: Omit<r.User, "userId">,
-  icon: File | null
+  icon: File | null,
+  progressCallback?: (percentage: number) => void
 ) {
   try {
+    const userC = await firebase
+      .auth()
+      .createUserWithEmailAndPassword(email, password);
     let iconUrl = "";
     if (icon) {
-      let k: firebase.storage.UploadTaskSnapshot = await new Promise(
+      let k: firebase.storage.UploadTaskSnapshot = await new Promise( //TODO: add progress callback
         (resolve, reject) => {
           let task = firebase
             .storage()
@@ -51,7 +59,13 @@ export async function createNewUser(
             .put(icon);
           task.on(
             "state_changed",
-            function progress(snapshot) {}, //implement
+            function progress(snapshot) {
+              if (progressCallback) {
+                progressCallback(
+                  (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+                );
+              }
+            },
             function error(err) {
               reject(err);
               console.log(err);
@@ -64,9 +78,7 @@ export async function createNewUser(
       );
       iconUrl = await k.ref.getDownloadURL();
     }
-    const userC = await firebase
-      .auth()
-      .createUserWithEmailAndPassword(email, password);
+
     if (userC.user) {
       const userObj = new User(userC.user.uid);
       return (await iconUrl)
@@ -221,6 +233,55 @@ export class Post {
     this.content = "";
     this.userId = "";
     this.timestamp = new Date();
+  }
+
+  async create(
+    post: r.Post,
+    file?: File,
+    progressCallback?: (percentage: number) => void
+  ) {
+    //TODO: add progress callback
+    try {
+      if (file) {
+        let k: firebase.storage.UploadTaskSnapshot = await new Promise(
+          (resolve, reject) => {
+            let task = firebase
+              .storage()
+              .ref(
+                "img/" + String(Date.now()) + "." + file.name.split(".").pop()
+              )
+              .put(file);
+            task.on(
+              "state_changed",
+              function progress(snapshot) {
+                if (progressCallback) {
+                  progressCallback(
+                    (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+                  );
+                }
+              },
+              function error(err) {
+                reject(err);
+                console.log("An error ocurred while uploading this image", err);
+              },
+              function complete() {
+                resolve(task);
+              }
+            );
+          }
+        );
+        await this.ref.set({
+          ...post,
+          image: await k.ref.getDownloadURL(),
+        });
+      } else {
+        await this.ref.set(post);
+      }
+      return true;
+    } catch (e) {
+      console.log("An error ocurred while creating this post", e);
+      return false;
+    }
   }
 
   async getData(): Promise<r.Post> {

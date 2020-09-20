@@ -64,12 +64,7 @@ const INITIAL_STATE_TEST: r.State = {
 };
 
 const INITIAL_STATE: r.State = {
-  currentUser: {
-    userId: "boisourish",
-    name: "UserName",
-    desc: "This should be the user's description",
-    icon: null,
-  },
+  currentUser: null,
   currentProfile: null,
   feed: null,
   users: {},

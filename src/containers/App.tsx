@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useState } from "react";
 import { withStyles, WithStyles } from "@material-ui/core/styles";
 import { Switch, Route, RouteComponentProps, Redirect } from "react-router-dom";
 
@@ -14,15 +14,17 @@ import {
   Hidden,
   Typography,
   Button,
+  Menu,
+  MenuItem,
 } from "@material-ui/core";
-import { Menu } from "@material-ui/icons";
+import { Menu as MenuIcon } from "@material-ui/icons";
 import NewsFeed from "./feed";
 import * as r from "../misc/reference";
 import { LeftSidebar } from "./leftSidebar";
 import Profile from "./profile";
 import { connect } from "react-redux";
 import { Login } from "../components/Login";
-import { createNewUser, login } from "../misc/firebaseMgmt";
+import { createNewUser, login, signOut } from "../misc/firebaseMgmt";
 import { Register } from "../components/Register";
 import { UserData } from "../components";
 
@@ -77,8 +79,8 @@ class App extends Component<AppProps, AppState> {
 
   componentDidUpdate() {
     if (
-      !this.state.user ||
-      (this.props.user && this.state.user.userId != this.props.user.userId)
+      this.props.user &&
+      (!this.state.user || this.state.user.userId != this.props.user.userId)
     ) {
       this.setState({ user: this.props.user });
     }
@@ -112,6 +114,7 @@ class App extends Component<AppProps, AppState> {
               setMenu={() => this.setState({ mobileOpen: true })}
               openLogin={() => this.setState({ showLogin: true })}
               openRegister={() => this.setState({ showRegister: true })}
+              signOut={() => signOut()}
             />
             <Box className={this.props.classes.innerApp}>
               <Switch>
@@ -144,25 +147,42 @@ function AppToolbar(props: {
   setMenu: () => void;
   openLogin: () => void;
   openRegister: () => void;
+  signOut: () => void;
 }) {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   return (
     <AppBar position="static">
       <Toolbar>
         <Hidden smUp implementation="css">
           <IconButton onClick={props.setMenu}>
-            <Menu />
+            <MenuIcon />
           </IconButton>
-          <div style={{ flexGrow: 1 }} />
-          {props.user ? (
-            <UserData user={props.user} />
-          ) : (
-            <div>
-              <Button onClick={props.openLogin}>Login</Button>
-              <Button onClick={props.openLogin}>Register</Button>
-            </div>
-          )}
         </Hidden>
         <Typography variant="h5">Simple-Social</Typography>
+        <div style={{ flexGrow: 1 }} />
+        {props.user ? (
+          <div>
+            <UserData
+              user={props.user}
+              onClick={(e) => setAnchorEl(e.currentTarget)}
+            />
+            <Menu
+              id="user-menu"
+              anchorEl={anchorEl}
+              keepMounted
+              open={Boolean(anchorEl)}
+              onClose={() => setAnchorEl(null)}
+            >
+              <MenuItem onClick={props.signOut}>Sign out</MenuItem>
+              <MenuItem>Profile? idk</MenuItem>
+            </Menu>
+          </div>
+        ) : (
+          <div>
+            <Button onClick={props.openLogin}>Login</Button>
+            <Button onClick={props.openLogin}>Register</Button>
+          </div>
+        )}
       </Toolbar>
     </AppBar>
   );
