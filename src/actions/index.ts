@@ -1,5 +1,5 @@
 import * as r from "../misc/reference";
-import { Profile, Feed, startAuthListener } from "../misc/firebaseMgmt";
+import { Profile, Feed, startAuthListener, Post } from "../misc/firebaseMgmt";
 
 export const setCurrentUser = (user: r.User | null): r.Action => ({
   type: r.ACT.SET_USER_INFO,
@@ -63,16 +63,31 @@ export const getProfile = function (profileId: string): r.AppThunk {
   };
 };
 
-export const getFeed = (currentId: string): r.AppThunk => async (dispatch) => {
+export const getFeed = (): r.AppThunk => async (dispatch, getStore) => {
   dispatch(clearFeed());
-  const feed = new Feed(currentId);
-  feed.getData().then((reduxPacket) => {
-    dispatch(addUsers(reduxPacket.users));
-    dispatch(setFeed(reduxPacket.posts));
-  });
+  const id = getStore().data.currentUser?.userId;
+  if (id) {
+    const feed = new Feed(id);
+    feed.getData().then((reduxPacket) => {
+      dispatch(addUsers(reduxPacket.users));
+      dispatch(setFeed(reduxPacket.posts));
+    });
+  }
 };
 
 export const getCurrentUser = (): r.AppThunk => async (dispatch) => {
   dispatch(setCurrentUser(null));
   startAuthListener((user) => dispatch(setCurrentUser(user)));
+};
+
+export const sendPost = (
+  post: r.Post,
+  file?: File,
+  progressCallback?: (percentage: number) => void
+): r.AppThunk => async (dispatch) => {
+  const postO = new Post();
+  const result = await postO.create(post, file, progressCallback);
+  if (result) {
+    dispatch(getFeed());
+  }
 };
