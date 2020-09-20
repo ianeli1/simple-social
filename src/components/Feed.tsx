@@ -40,7 +40,7 @@ interface FeedProps extends WithStyles<typeof FeedCSS> {
 function Feed({ drawNewPost = true, ...props }: FeedProps) {
   return props.feed ? (
     <Container className={props.classes.root}>
-      {drawNewPost && <NewPost user={props.user} />}
+      {drawNewPost && <NewPost />}
       {props.feed && Object.keys(props.feed).length ? (
         Object.entries(props.feed).map((
           [ts, post] //TODO: timestamppppp

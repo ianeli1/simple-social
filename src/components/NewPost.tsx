@@ -13,6 +13,7 @@ import React, { useEffect, useState } from "react";
 import { UserData } from "./UserData";
 import { formatDate } from "../misc/format";
 import * as r from "../misc/reference";
+import { connect } from "react-redux";
 
 const newPostStyles = makeStyles({
   root: {
@@ -52,8 +53,14 @@ const newPostStyles = makeStyles({
   },
 });
 
-export function NewPost(props: { user: r.User }) {
+export function NewPostRaw(props: { user: r.User | null }) {
   const [time, setTime] = useState<Date>(new Date());
+  const user: r.User = props.user || {
+    userId: "0",
+    name: "0",
+    desc: "0",
+    icon: null,
+  };
   useEffect(() => {
     const dateInterval = setInterval(
       async () => await setTime(new Date()),
@@ -69,7 +76,7 @@ export function NewPost(props: { user: r.User }) {
     //It's a header so the feed doesn't change its margin
     <Paper component="header" className={classes.root}>
       <Box className={classes.firstRow}>
-        <UserData user={props.user} />
+        <UserData user={user} />
         <Typography variant="h6">@ {formatDate(time)}</Typography>
       </Box>
       <Paper className={classes.content}>
@@ -99,3 +106,17 @@ export function NewPost(props: { user: r.User }) {
     </Paper>
   );
 }
+
+const mapStateToProps = ({ data }: { data: r.State }) => ({
+  user: data.currentUser,
+});
+
+const mapDispatchToProps = (dispatch: r.AppDispatch) => ({
+  /*sendPost: (
+    post: r.Post,
+    file?: File,
+    progressCallback?: (percentage: number) => void
+  ) => dispatch(sendPost(post, file, progressCallback)),*/
+});
+
+export const NewPost = connect(mapStateToProps, mapDispatchToProps)(NewPostRaw);
