@@ -73,7 +73,7 @@ class App extends Component<AppProps, AppState> {
       mobileOpen: false,
       loggedIn: Boolean(this.props.user),
       showLogin: false,
-      showRegister: true,
+      showRegister: false,
     };
   }
 
