@@ -234,7 +234,7 @@ export class Post {
       this.postId = String(Date.now());
     }
 
-    this.ref = db.collection("globalPosts").doc(postId);
+    this.ref = db.collection("globalPosts").doc(this.postId);
     this.content = "";
     this.userId = "";
     this.timestamp = new Date();

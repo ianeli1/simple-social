@@ -4,6 +4,7 @@ import {
   ButtonGroup,
   IconButton,
   InputBase,
+  LinearProgress,
   makeStyles,
   Paper,
   Typography,
@@ -15,6 +16,7 @@ import { formatDate } from "../misc/format";
 import * as r from "../misc/reference";
 import { connect } from "react-redux";
 import { constants } from "os";
+import { sendPost } from "../actions";
 
 const newPostStyles = makeStyles({
   root: {
@@ -72,12 +74,20 @@ const newPostStyles = makeStyles({
   },
 });
 
-export function NewPostRaw(props: { user: r.User | null }) {
+export function NewPostRaw(props: {
+  user: r.User | null;
+  createPost: (
+    post: r.Post,
+    file?: File,
+    progressCallback?: (percentage: number) => void
+  ) => void;
+}) {
   const [time, setTime] = useState<Date>(new Date());
   const [image, setImage] = useState("");
   const [content, setContent] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [liked, setLiked] = useState(false);
+  const [loading, setLoading] = useState(0);
   const user: r.User = props.user || {
     userId: "0",
     name: "0",
@@ -94,16 +104,26 @@ export function NewPostRaw(props: { user: r.User | null }) {
     };
   });
 
-  function handleFile(event: ChangeEvent<HTMLInputElement>) {
+  async function handleFile(event: ChangeEvent<HTMLInputElement>) {
     if (event.target.files && event.target.files[0]) {
       setImage(URL.createObjectURL(event.target.files[0]));
       setFile(event.target.files[0]);
     }
   }
 
-  function handleSend() {
-    if (content.length >= 5 && user) {
+  async function handleSend() {
+    if (content.length >= 5 && props.user) {
+      // TODO: implement error handling
       //send the post lmao
+      await props.createPost(
+        {
+          userId: props.user?.userId,
+          content,
+          timestamp: new Date(),
+        },
+        file || undefined,
+        (percentage) => setLoading(percentage)
+      );
       setImage("");
       setFile(null);
       setContent("");
@@ -128,11 +148,13 @@ export function NewPostRaw(props: { user: r.User | null }) {
             placeholder="What are you thinking about?"
             value={content}
             onChange={(e) => setContent(e.target.value)}
+            disabled={Boolean(loading)}
           />
           <ButtonGroup
             orientation="vertical"
             color="primary"
             className={classes.btngroup}
+            disabled={Boolean(loading)}
           >
             <input
               style={{ display: "none" }}
@@ -154,15 +176,19 @@ export function NewPostRaw(props: { user: r.User | null }) {
           </div>
         )}
       </Paper>
-      <Box className={classes.interaction}>
-        <IconButton onClick={() => setLiked(!liked)}>
-          <Favorite style={{ color: liked ? "#ff0800" : undefined }} />
-        </IconButton>
-        <div style={{ width: 20 }} />
-        <IconButton onClick={handleSend}>
-          <Send />
-        </IconButton>
-      </Box>
+      {loading > 0 ? (
+        <LinearProgress variant="determinate" value={loading} />
+      ) : (
+        <Box className={classes.interaction}>
+          <IconButton onClick={() => setLiked(!liked)}>
+            <Favorite style={{ color: liked ? "#ff0800" : undefined }} />
+          </IconButton>
+          <div style={{ width: 20 }} />
+          <IconButton onClick={handleSend}>
+            <Send />
+          </IconButton>
+        </Box>
+      )}
     </Paper>
   );
 }
@@ -172,11 +198,10 @@ const mapStateToProps = ({ data }: { data: r.State }) => ({
 });
 
 const mapDispatchToProps = (dispatch: r.AppDispatch) => ({
-  /*sendPost: (
+  createPost: (
     post: r.Post,
     file?: File,
     progressCallback?: (percentage: number) => void
-  ) => dispatch(sendPost(post, file, progressCallback)),*/
+  ) => dispatch(sendPost(post, file, progressCallback)),
 });
-
 export const NewPost = connect(mapStateToProps, mapDispatchToProps)(NewPostRaw);
