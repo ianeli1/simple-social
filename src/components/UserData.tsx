@@ -14,6 +14,11 @@ const userDataStyle = makeStyles({
     flexDirection: "row",
     marginRight: 8,
     alignItems: "center",
+    cursor: "pointer",
+    "&:hover": {
+      background: "#C1C2C1",
+      transition: "background 500ms",
+    },
   },
   nameBox: {
     marginLeft: 4,
@@ -26,10 +31,18 @@ const userDataStyle = makeStyles({
   },
 });
 
-export function UserData(props: { user: r.User; extra?: string }) {
+export function UserData(props: {
+  user: r.User;
+  extra?: string;
+  onClick?: (e: React.MouseEvent<HTMLDivElement>, user: r.User) => void;
+}) {
   const classes = userDataStyle();
   return (
-    <div className={classes.root} key={props.user.userId}>
+    <div
+      className={classes.root}
+      key={props.user.userId}
+      onClick={(e) => props.onClick && props.onClick(e, props.user)}
+    >
       {props.user.icon ? (
         <Avatar alt={props.user.name} src={props.user.icon} />
       ) : (
