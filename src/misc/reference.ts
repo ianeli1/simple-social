@@ -99,12 +99,17 @@ export interface Feed {
   [key: string]: Post;
 }
 
-export interface Post {
-  userId: string;
+export interface NewPost {
   content: string;
+  liked: boolean;
+  ref?: string; //the ref id
+  image?: string; //the image url
+}
+
+export interface Post extends Omit<NewPost, "liked"> {
+  userId: string;
   timestamp: Date;
-  ref?: Post; //The app should manage converting the postID into a post
-  image?: string;
+  likes: string[];
 }
 
 export interface User {
@@ -201,13 +206,46 @@ export interface State {
   ref: Feed; //stores any ref that may be used
 }
 
+export interface ServerProfile {
+  //Profile data interface used in the backend
+  userId: string;
+  icon: string;
+  name: string;
+  desc: string;
+  posts: string[];
+  feed: string[];
+  friends: string[];
+}
+
 export interface ReduxPacket {
   profile?: Profile;
   users: {
     [key: string]: User;
   };
   posts: Feed;
+  error?: undefined;
 }
+
+export interface ServerReduxPacket {
+  //This NEEDS to be fixed
+  profile?: ServerProfile;
+  users: {
+    [key: string]: User;
+  };
+  posts: Feed;
+  error?: undefined;
+}
+
+export interface Error {
+  profile?: undefined;
+  users?: undefined;
+  posts?: undefined;
+  error: string;
+}
+
+export type DataPacket = ReduxPacket | Error;
+//Literal pain
+export type ServerDataPacket = ServerReduxPacket | Error;
 
 export type AppThunk<ReturnType = void> = ThunkAction<
   ReturnType,

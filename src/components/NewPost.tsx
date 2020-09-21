@@ -117,9 +117,10 @@ export function NewPostRaw(props: {
       //send the post lmao
       await props.createPost(
         {
-          userId: props.user?.userId,
+          userId: props.user.userId,
           content,
           timestamp: new Date(),
+          likes: liked ? [props.user.userId] : [],
         },
         file || undefined,
         (percentage) => setLoading(percentage)
