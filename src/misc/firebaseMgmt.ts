@@ -14,14 +14,91 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const fn = firebase.functions();
+
+const cloudFunction = <Input = any, Return = any>( //Firebase Cloud Function Factory for Typescript
+  name: string
+): ((data: Input) => Promise<Return>) => {
+  const callable = firebase.functions().httpsCallable(name);
+  return async (data: Input) => (await callable(data)).data;
+};
 
 declare global {
   interface Window {
     firestore: any;
+    cloudFunctions: any;
   }
 }
 
-window.firestore = db.collection("globalPosts");
+function mapServerProfileToAppProfile(profile: r.ServerProfile): r.Profile {
+  return {
+    data: {
+      userId: profile.userId,
+      name: profile.name,
+      desc: profile.desc,
+      icon: profile.icon,
+    },
+    friends: profile.friends,
+    posts: profile.posts,
+  };
+}
+
+function mapServerDataPacketToAppDataPacket(
+  packet: r.ServerDataPacket
+): r.DataPacket {
+  if (packet.error) {
+    return packet;
+  } else
+    return {
+      profile: packet.profile
+        ? mapServerProfileToAppProfile(packet.profile)
+        : undefined,
+      users: packet.users || {},
+      posts: packet.posts || {},
+    };
+}
+
+export const functions = (() => {
+  const rawFunctions = {
+    acceptFriendReq: cloudFunction<{ userId: string }, void>("acceptFriendReq"),
+    addFriendReq: cloudFunction<{ userId: string }, void>("addFriendReq"),
+    addPost: cloudFunction<any, void>("addPost"),
+    createUser: cloudFunction<Omit<r.User, "userId">, r.ServerProfile>(
+      "createUser"
+    ),
+    getFeed: cloudFunction<{}, r.ServerDataPacket>("getFeed"),
+    getProfile: cloudFunction<{ userId: string }, r.ServerDataPacket>(
+      "getProfile"
+    ),
+  };
+  return {
+    acceptFriendReq(userId: string) {
+      return rawFunctions.acceptFriendReq({ userId });
+    },
+    addFriendReq(userId: string) {
+      return rawFunctions.addFriendReq({ userId });
+    },
+    addPost(newPost: r.NewPost) {
+      return rawFunctions.addPost(JSON.parse(JSON.stringify(newPost)));
+    },
+    async createUser(userData: Omit<r.User, "userId">): Promise<r.Profile> {
+      const profile: r.ServerProfile = await rawFunctions.createUser(userData);
+      return mapServerProfileToAppProfile(profile);
+    },
+    async getFeed(): Promise<r.DataPacket> {
+      const data: r.ServerDataPacket = await rawFunctions.getFeed({});
+      return mapServerDataPacketToAppDataPacket(data);
+    },
+    async getProfile(userId: string): Promise<r.DataPacket> {
+      return mapServerDataPacketToAppDataPacket(
+        await rawFunctions.getProfile({ userId })
+      );
+    },
+  };
+})();
+
+window.cloudFunctions = functions;
+window.firestore = db;
 
 export function startAuthListener(callback: (user: r.User | null) => void) {
   firebase.auth().onAuthStateChanged(async (user) => {
@@ -227,6 +304,7 @@ export class Post {
   content: string;
   timestamp: Date;
   userId: string;
+  likes: string[];
   constructor(postId?: string) {
     if (postId) {
       this.postId = postId;
@@ -238,6 +316,7 @@ export class Post {
     this.content = "";
     this.userId = "";
     this.timestamp = new Date();
+    this.likes = [];
   }
 
   async create(
@@ -275,12 +354,27 @@ export class Post {
             );
           }
         );
+        await functions.addPost({
+          //Cloud Function
+          content: post.content,
+          image: await k.ref.getDownloadURL(),
+          ref: post.ref,
+          liked: Boolean(post.likes.length),
+        });
+        /* Using the app
         await this.ref.set({
           ...post,
           image: await k.ref.getDownloadURL(),
-        });
+        });*/
       } else {
-        await this.ref.set(post);
+        await functions.addPost({
+          //Cloud Function
+          content: post.content,
+          image: post.image,
+          ref: post.ref,
+          liked: Boolean(post.likes.length),
+        });
+        /*await this.ref.set(post);*/
       }
       return true;
     } catch (e) {
@@ -297,6 +391,7 @@ export class Post {
         this.userId = (await (doc && doc.userId)) || "";
         this.content = (await (doc && doc.content)) || "";
         this.timestamp = (await (doc && doc.timestamp).toDate()) || new Date();
+        this.likes = (await (doc && doc.likes)) || [];
       } else {
         throw new Error("I couldn't find the post:" + this.postId);
       }
@@ -307,6 +402,7 @@ export class Post {
       userId: this.userId,
       content: this.content,
       timestamp: this.timestamp,
+      likes: this.likes,
     };
   }
 }
