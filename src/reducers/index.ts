@@ -1,67 +1,67 @@
 import * as r from "../misc/reference";
 import { combineReducers } from "redux";
 
-const INITIAL_STATE_TEST: r.State = {
-  currentUser: {
-    userId: "0",
-    name: "UserName",
-    desc: "This should be the user's description",
-    icon: null,
-  },
-  currentProfile: {
-    data: {
-      userId: "2",
-      name: "UserName 2",
-      desc: "User description :)",
-      icon: null,
-    },
-    friends: ["0", "1", "2"],
-    posts: ["0", "2"],
-  },
-  feed: {
-    "0": {
-      userId: "2",
-      content: "My first post!",
-      timestamp: new Date(1596952800000),
-    },
-    "2": {
-      userId: "2",
-      content: "My first post!",
-      timestamp: new Date(1596952800000),
-    },
-    "3": {
-      userId: "2",
-      content: "My first post!",
-      timestamp: new Date(1596952800000),
-    },
-    "4": {
-      userId: "2",
-      content: "My first post!",
-      timestamp: new Date(1596952800000),
-    },
-  },
-  users: {
-    "0": {
-      userId: "0",
-      name: "Cool Person",
-      desc: "This should be the user's description",
-      icon: null,
-    },
-    "1": {
-      userId: "0",
-      name: "User Name",
-      desc: "This should be the user's description",
-      icon: null,
-    },
-    "2": {
-      userId: "0",
-      name: "El úsúáríó con un nombre muy largo",
-      desc: "This should be the user's description",
-      icon: null,
-    },
-  },
-  ref: {},
-};
+// const INITIAL_STATE_TEST: r.State = {
+//   currentUser: {
+//     userId: "0",
+//     name: "UserName",
+//     desc: "This should be the user's description",
+//     icon: null,
+//   },
+//   currentProfile: {
+//     data: {
+//       userId: "2",
+//       name: "UserName 2",
+//       desc: "User description :)",
+//       icon: null,
+//     },
+//     friends: ["0", "1", "2"],
+//     posts: ["0", "2"],
+//   },
+//   feed: {
+//     "0": {
+//       userId: "2",
+//       content: "My first post!",
+//       timestamp: new Date(1596952800000),
+//     },
+//     "2": {
+//       userId: "2",
+//       content: "My first post!",
+//       timestamp: new Date(1596952800000),
+//     },
+//     "3": {
+//       userId: "2",
+//       content: "My first post!",
+//       timestamp: new Date(1596952800000),
+//     },
+//     "4": {
+//       userId: "2",
+//       content: "My first post!",
+//       timestamp: new Date(1596952800000),
+//     },
+//   },
+//   users: {
+//     "0": {
+//       userId: "0",
+//       name: "Cool Person",
+//       desc: "This should be the user's description",
+//       icon: null,
+//     },
+//     "1": {
+//       userId: "0",
+//       name: "User Name",
+//       desc: "This should be the user's description",
+//       icon: null,
+//     },
+//     "2": {
+//       userId: "0",
+//       name: "El úsúáríó con un nombre muy largo",
+//       desc: "This should be the user's description",
+//       icon: null,
+//     },
+//   },
+//   ref: {},
+// };
 
 const INITIAL_STATE: r.State = {
   currentUser: null,

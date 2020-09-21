@@ -1,5 +1,11 @@
 import * as r from "../misc/reference";
-import { Profile, Feed, startAuthListener, Post } from "../misc/firebaseMgmt";
+import {
+  Profile,
+  Feed,
+  startAuthListener,
+  Post,
+  functions,
+} from "../misc/firebaseMgmt";
 
 export const setCurrentUser = (user: r.User | null): r.Action => ({
   type: r.ACT.SET_USER_INFO,
@@ -48,6 +54,11 @@ export const clearProfile = () => ({
 export const getProfile = function (profileId: string): r.AppThunk {
   return async (dispatch) => {
     dispatch(clearProfile());
+    const data = await functions.getProfile(profileId);
+    data.posts && dispatch(setFeed(data.posts));
+    data.users && dispatch(addUsers(data.users));
+    data.profile && dispatch(setProfile(data.profile));
+    /*
     const profile = new Profile(profileId);
     profile.getData().then((reduxPacket) => {
       reduxPacket.profile && dispatch(setProfile(reduxPacket.profile));
@@ -67,11 +78,16 @@ export const getFeed = (): r.AppThunk => async (dispatch, getStore) => {
   dispatch(clearFeed());
   const id = getStore().data.currentUser?.userId;
   if (id) {
+    const data = await functions.getFeed();
+    console.log(JSON.stringify(data, null, 2));
+    dispatch(addUsers(data.users || {}));
+    dispatch(setFeed(data.posts || {}));
+    /*
     const feed = new Feed(id);
     feed.getData().then((reduxPacket) => {
       dispatch(addUsers(reduxPacket.users));
       dispatch(setFeed(reduxPacket.posts));
-    });
+    });*/
   }
 };
 
